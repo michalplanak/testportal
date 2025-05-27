@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MózgOnFire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">MózgOnFire</div>
+            <ul>
+                <!-- Navigation will be dynamically updated by js/auth.js -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard">
+            <h1>Admin Panel - Welcome, <span id="adminName">Admin</span>!</h1>
+
+            <!-- User Management Section -->
+            <section class="user-list">
+                <h2>User Management</h2>
+                <div id="allUsersContainer">
+                    <!-- Users will be loaded here -->
+                    <p>Loading users...</p>
+                </div>
+            </section>
+
+            <!-- Quiz Management Section -->
+            <section class="quiz-list">
+                <h2>Quiz Management (All Quizzes)</h2>
+                <div id="allQuizzesContainer">
+                    <!-- All quizzes will be loaded here -->
+                    <p>Loading all quizzes...</p>
+                </div>
+            </section>
+
+            <!-- Account Conversion Requests Section -->
+            <section class="request-list">
+                <h2>Account Conversion Requests</h2>
+                <div id="conversionRequestsContainer">
+                    <!-- Conversion requests will be loaded here -->
+                    <p>Loading requests...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 MózgOnFire. All rights reserved.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = getCurrentUser();
+            if (!currentUser || currentUser.accountType !== 'admin') {
+                alert('Access denied. Please login as an administrator.');
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('adminName').textContent = currentUser.firstName;
+
+            // Load data for admin panel
+            if (typeof loadAllUsersForAdmin === 'function') {
+                loadAllUsersForAdmin();
+            } else {
+                document.getElementById('allUsersContainer').innerHTML = '<p>Error loading user management functionality.</p>';
+            }
+
+            if (typeof loadAllQuizzesForAdmin === 'function') {
+                loadAllQuizzesForAdmin();
+            } else {
+                document.getElementById('allQuizzesContainer').innerHTML = '<p>Error loading quiz management functionality.</p>';
+            }
+            
+            if (typeof loadConversionRequests === 'function') {
+                loadConversionRequests();
+            } else {
+                 document.getElementById('conversionRequestsContainer').innerHTML = '<p>Error loading conversion request functionality.</p>';
+            }
+        });
+
+        // Functions for admin actions (will call functions in dashboard.js)
+        function banUser(userId) {
+            if (confirm('Are you sure you want to ban this user?')) {
+                if(typeof processUserBan === 'function') processUserBan(userId);
+            }
+        }
+
+        function changeUserRole(userId, currentRole) {
+            const newRole = prompt(`Enter new role for user (current: ${currentRole}). Options: student, teacher, admin, moderator.`, currentRole);
+            if (newRole && ['student', 'teacher', 'admin', 'moderator'].includes(newRole.toLowerCase())) {
+                if(typeof processUserRoleChange === 'function') processUserRoleChange(userId, newRole.toLowerCase());
+            } else if (newRole) {
+                alert('Invalid role specified.');
+            }
+        }
+
+        function deleteQuizAsAdmin(quizId) {
+            if (confirm('Are you sure you want to PERMANENTLY DELETE this quiz? This action cannot be undone.')) {
+                 if(typeof processDeleteQuiz === 'function') processDeleteQuiz(quizId, 'admin');
+            }
+        }
+        
+        function approveRequest(requestId) {
+            if (confirm('Are you sure you want to approve this account conversion request?')) {
+                if(typeof processConversionRequest === 'function') processConversionRequest(requestId, 'approved');
+            }
+        }
+
+        function rejectRequest(requestId) {
+            if (confirm('Are you sure you want to reject this account conversion request?')) {
+                 if(typeof processConversionRequest === 'function') processConversionRequest(requestId, 'rejected');
+            }
+        }
+    </script>
+</body>
+</html>

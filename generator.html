@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator Testów</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    .container {
+      background: white;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    textarea, input, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .test-list {
+      margin-top: 30px;
+    }
+    .test-item {
+      background-color: #e9f5e9;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-left: 5px solid #4CAF50;
+    }
+    .question {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Generator Testów</h2>
+
+    <label for="material">Materiały do testu:</label>
+    <textarea id="material" rows="4" placeholder="Wprowadź materiały..."></textarea>
+
+    <label for="questionCount">Liczba pytań:</label>
+    <input type="number" id="questionCount" min="1" placeholder="Np. 5">
+
+    <label for="difficulty">Poziom trudności:</label>
+    <select id="difficulty">
+      <option value="latwy">Łatwy</option>
+      <option value="sredni">Średni</option>
+      <option value="trudny">Trudny</option>
+    </select>
+
+    <button onclick="generateTest()">Generuj Test</button>
+
+    <div class="test-list" id="testList"></div>
+  </div>
+
+  <script>
+    function generateTest() {
+      const material = document.getElementById('material').value.trim();
+      const questionCount = parseInt(document.getElementById('questionCount').value);
+      const difficulty = document.getElementById('difficulty').value;
+
+      if (!material || !questionCount || isNaN(questionCount)) {
+        alert('Uzupełnij wszystkie pola.');
+        return;
+      }
+
+      const generatedQuestions = generateQuestionsFromMaterial(material, questionCount);
+
+      const newTest = {
+        id: Date.now(),
+        material,
+        questionCount,
+        difficulty,
+        questions: generatedQuestions,
+        timestamp: new Date().toLocaleString()
+      };
+
+      let tests = JSON.parse(localStorage.getItem('tests')) || [];
+      tests.push(newTest);
+      localStorage.setItem('tests', JSON.stringify(tests));
+
+      displayTests();
+
+      document.getElementById('material').value = '';
+      document.getElementById('questionCount').value = '';
+      document.getElementById('difficulty').value = 'latwy';
+    }
+
+    function generateQuestionsFromMaterial(material, count) {
+      const sentences = material.split(/[\.\!\?]/).map(s => s.trim()).filter(s => s.length > 10);
+      const questions = [];
+
+      for (let i = 0; i < count; i++) {
+        if (sentences.length === 0) {
+            return [];
+        }
+        if (!sentence) continue;
+        const missingIndex = Math.floor(Math.random() * words.length);
+        const answer = words[missingIndex];
+        words[missingIndex] = '_____';
+        questions.push({
+          question: `Uzupełnij lukę: ${words.join(' ')}`,
+          answer: answer
+        });
+      }
+
+      return questions;
+    }
+
+    function displayTests() {
+      const testList = document.getElementById('testList');
+      const tests = JSON.parse(localStorage.getItem('tests')) || [];
+
+      testList.innerHTML = '<h3>Zapisane testy:</h3>' + tests.map(test => `
+        <div class="test-item">
+          <strong>Data:</strong> ${test.timestamp}<br>
+          <strong>Pytania:</strong> ${test.questionCount}<br>
+          <strong>Trudność:</strong> ${test.difficulty}<br>
+          <strong>Materiały:</strong><br>${test.material.replace(/\n/g, '<br>')}<br>
+          <div class="question">
+            <strong>Wygenerowane pytania:</strong>
+            <ul>
+              ${test.material.replace(/\r?\n/g, '<br>')}
+            </ul>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.onload = displayTests;
+  </script>
+</body>
+</html>

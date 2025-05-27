@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Quiz - MózgOnFire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">MózgOnFire</div>
+            <ul>
+                <!-- Navigation will be dynamically updated by js/auth.js -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="quiz-solve-page">
+            <h2 id="quizTitle" class="quiz-title">Loading Quiz...</h2>
+            
+            <form id="quizSolveForm">
+                <div id="questionsContainer">
+                    <!-- Questions will be dynamically loaded here -->
+                    <p>Please wait while the quiz content is loaded.</p>
+                </div>
+                <button type="submit" id="submitQuizBtn" class="cta-button submit-quiz-btn" style="display: none;">Submit Answers</button>
+            </form>
+
+            <div id="quizSolveContainer">
+                <!-- This container is also used for results after submission -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 MózgOnFire. All rights reserved.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script> <!-- Contains quiz solving logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                alert('You need to be logged in to solve a quiz.');
+                window.location.href = 'login.html';
+                return;
+            }
+            updateNavBasedOnLogin(); // Ensure nav is correct
+
+            const quizId = localStorage.getItem('selectedQuizId') || new URLSearchParams(window.location.search).get('id');
+            
+            if (!quizId) {
+                document.getElementById('quizSolveContainer').innerHTML = '<h2>No quiz selected. Please go back to the dashboard.</h2>';
+                return;
+            }
+
+            const quizData = loadQuizForSolving(quizId); // From dashboard.js
+
+            if (quizData) {
+                document.getElementById('submitQuizBtn').style.display = 'block';
+                const quizSolveForm = document.getElementById('quizSolveForm');
+                quizSolveForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to submit your answers?')) {
+                        submitQuizAnswers(quizData); // From dashboard.js
+                        document.getElementById('submitQuizBtn').style.display = 'none';
+                         document.getElementById('questionsContainer').style.display = 'none'; // Hide questions after submit
+                    }
+                });
+            } else {
+                // loadQuizForSolving will update the UI if quiz is not found or accessible
+                 document.getElementById('submitQuizBtn').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

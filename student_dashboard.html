@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - MózgOnFire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">MózgOnFire</div>
+            <ul>
+                <!-- Navigation will be dynamically updated by js/auth.js -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard">
+            <h1>Welcome, <span id="studentName">Student</span>!</h1>
+            
+            <div class="quiz-list">
+                <h2>Available Quizzes</h2>
+                <div id="availableQuizzesContainer">
+                    <!-- Quizzes will be loaded here by JavaScript -->
+                    <p>Loading quizzes...</p>
+                    <!-- Example Quiz Item Structure (for reference, will be dynamically generated)
+                    <div class="quiz-item">
+                        <span class="quiz-item-title">Introduction to Algebra</span>
+                        <div class="quiz-item-actions">
+                            <button onclick="startQuiz('quizId1')">Start Quiz</button>
+                        </div>
+                    </div>
+                    <div class="quiz-item">
+                        <span class="quiz-item-title">World Capitals Challenge</span>
+                        <div class="quiz-item-actions">
+                            <button onclick="startQuiz('quizId2')">Start Quiz</button>
+                        </div>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 MózgOnFire. All rights reserved.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = getCurrentUser();
+            if (!currentUser || currentUser.accountType !== 'student') {
+                alert('Access denied. Please login as a student.');
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('studentName').textContent = currentUser.firstName;
+            // `loadStudentQuizzes` will be defined in dashboard.js
+            if (typeof loadStudentQuizzes === 'function') {
+                loadStudentQuizzes();
+            } else {
+                document.getElementById('availableQuizzesContainer').innerHTML = '<p>Error loading quiz functionality.</p>';
+            }
+        });
+
+        function startQuiz(quizId) {
+            // Store the quizId to be picked up by the quiz solving page
+            localStorage.setItem('selectedQuizId', quizId);
+            window.location.href = `quiz_solve.html`;
+        }
+    </script>
+</body>
+</html>

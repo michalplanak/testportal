@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MózgOnFire</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">MózgOnFire</div>
+            <ul>
+                <!-- Navigation will be dynamically updated by js/auth.js -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="settings-page">
+            <h2>Account Settings</h2>
+            <div id="settingsContent">
+                <p>Loading settings...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 MózgOnFire. All rights reserved.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script> <!-- May contain helper functions if needed -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                alert('You need to be logged in to access settings.');
+                window.location.href = 'login.html';
+                return;
+            }
+            updateNavBasedOnLogin();
+            loadSettingsContent(currentUser);
+        });
+
+        function loadSettingsContent(user) {
+            const settingsContent = document.getElementById('settingsContent');
+            settingsContent.innerHTML = ''; // Clear loading
+
+            // Section 1: User Information (Read-only for now)
+            const userInfoSection = document.createElement('div');
+            userInfoSection.classList.add('settings-section');
+            userInfoSection.innerHTML = `
+                <h3>User Information</h3>
+                <p><strong>Name:</strong> ${user.firstName} ${user.lastName}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Account Type:</strong> ${user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)}</p>
+            `;
+            settingsContent.appendChild(userInfoSection);
+
+            // Section 2: Change Password (Placeholder)
+            const passwordSection = document.createElement('div');
+            passwordSection.classList.add('settings-section');
+            passwordSection.innerHTML = `
+                <h3>Change Password</h3>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                    </div>
+                    <button type="submit">Change Password</button>
+                </form>
+            `;
+            settingsContent.appendChild(passwordSection);
+            document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+
+
+            // Section 3: Account Conversion (for Students)
+            if (user.accountType === 'student') {
+                const conversionSection = document.createElement('div');
+                conversionSection.classList.add('settings-section');
+                conversionSection.innerHTML = `<h3>Become a Teacher</h3>`;
+
+                // Check if a pending request already exists
+                const existingRequests = getConversionRequests(); // from dashboard.js
+                const pendingRequest = existingRequests.find(r => r.userId === user.userId && r.status === 'pending');
+
+                if (pendingRequest) {
+                    conversionSection.innerHTML += `<p>You have a pending request to become a teacher. Status: <strong>Pending Review</strong>.</p>`;
+                } else {
+                    conversionSection.innerHTML += `
+                        <p>If you are an educator and would like to create quizzes, you can request to convert your account to a Teacher account.</p>
+                        <button id="requestConversionBtn" class="cta-button">Request Teacher Account</button>
+                        <div id="conversionFormContainer" style="display:none; margin-top: 1rem;">
+                            <form id="conversionRequestForm">
+                                <div class="form-group">
+                                    <label for="schoolName">School/Institution Name</label>
+                                    <input type="text" id="schoolName" name="schoolName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reason">Reason for Request (e.g., subjects taught)</label>
+                                    <textarea id="reason" name="reason" rows="3" required style="width: calc(100% - 22px); padding: 0.7rem; border: 1px solid #444; border-radius: 5px; background-color: #333; color: #f0f0f0; font-size: 1rem;"></textarea>
+                                </div>
+                                <button type="submit">Submit Request</button>
+                                <button type="button" id="cancelConversionBtn" style="background-color: #6c757d; margin-left: 10px;">Cancel</button>
+                            </form>
+                        </div>
+                    `;
+                    settingsContent.appendChild(conversionSection);
+
+                    document.getElementById('requestConversionBtn').addEventListener('click', () => {
+                        document.getElementById('conversionFormContainer').style.display = 'block';
+                        document.getElementById('requestConversionBtn').style.display = 'none';
+                    });
+                    document.getElementById('cancelConversionBtn').addEventListener('click', () => {
+                        document.getElementById('conversionFormContainer').style.display = 'none';
+                        document.getElementById('requestConversionBtn').style.display = 'inline-block';
+                        document.getElementById('conversionRequestForm').reset();
+                    });
+                    document.getElementById('conversionRequestForm').addEventListener('submit', handleConversionRequest);
+                }
+                 settingsContent.appendChild(conversionSection);
+            }
+        }
+
+        function handleChangePassword(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmNewPassword) {
+                alert('New passwords do not match.');
+                return;
+            }
+            if (newPassword.length < 6) {
+                alert('New password must be at least 6 characters long.');
+                return;
+            }
+
+            // Simulate password check (in real app, this is backend)
+            let users = getAllUsers(); // from auth.js
+            const userIndex = users.findIndex(u => u.id === currentUser.userId);
+
+            if (userIndex === -1 || users[userIndex].password !== currentPassword) {
+                alert('Incorrect current password.');
+                return;
+            }
+
+            // Update password
+            users[userIndex].password = newPassword;
+            localStorage.setItem('mozgOnFireUsers', JSON.stringify(users));
+            
+            // Update session if current user's password changed (though session doesn't store password)
+            // No, session doesn't need update for password change.
+
+            alert('Password changed successfully.');
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        function handleConversionRequest(event) {
+            event.preventDefault();
+            const currentUser = getCurrentUser();
+            const schoolName = document.getElementById('schoolName').value.trim();
+            const reason = document.getElementById('reason').value.trim();
+
+            if (!schoolName || !reason) {
+                alert('Please fill in all fields for the conversion request.');
+                return;
+            }
+
+            const newRequest = {
+                id: `req_${Date.now()}_${currentUser.userId.slice(-4)}`,
+                userId: currentUser.userId,
+                requestedAt: new Date().toISOString(),
+                schoolName: schoolName,
+                reason: reason,
+                status: 'pending', // pending, approved, rejected
+                processedBy: null,
+                processedAt: null
+            };
+
+            let requests = getConversionRequests(); // from dashboard.js
+            requests.push(newRequest);
+            saveConversionRequests(requests); // from dashboard.js
+
+            alert('Your request to become a teacher has been submitted for review.');
+            // Refresh settings content to show pending status
+            loadSettingsContent(currentUser);
+        }
+
+    </script>
+</body>
+</html>
