@@ -1,5 +1,7 @@
 // Authentication script for MózgOnFire
 
+// {id: "user_1748409827735_4u8tq", firstName: "admin", lastName: "admin", email: "admin@admin.admin",…}
+
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const loginForm = document.getElementById('loginForm');
