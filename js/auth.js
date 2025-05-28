@@ -2,6 +2,8 @@
 
 // {id: "user_1748409827735_4u8tq", firstName: "admin", lastName: "admin", email: "admin@admin.admin",…}
 
+// [{"id":"user_1748409827735_4u8tq","firstName":"admin","lastName":"admin","email":"admin@admin.admin","password":"skibidi","accountType":"admin","createdAt":"2025-05-28T05:23:47.735Z"},{"id":"user_1748409895311_u9w87","firstName":"Nauczyciel","lastName":"Nauczyciel","email":"Nauczyciel@Nauczyciel.Nauczyciel","password":"Nauczyciel123","accountType":"teacher","createdAt":"2025-05-28T05:24:55.311Z"},{"id":"user_1748409946206_hzr8k","firstName":"Uczen","lastName":"Uczen","email":"uczen@uczen.uczen","password":"uczen123","accountType":"student","createdAt":"2025-05-28T05:25:46.206Z"}]
+
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const loginForm = document.getElementById('loginForm');
@@ -75,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const email = loginForm.email.value.trim();
             const password = loginForm.password.value;
+
+            
 
             if (!email || !password) {
                 alert('Please enter both email and password.');
